@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { useChat } from "@ai-sdk/react";
-import { useRouter } from "next/router";
+import { useChat } from '@ai-sdk/react';
+import { useRouter } from "next/navigation";
 import { useLiveQuery } from "dexie-react-hooks";
 import { SendHorizontal, MinusCircle } from "lucide-react";
-import { db, createChat, createChatMessage, saveMessage, updateChatTitle, deleteChat, getChat } from "../lib/firebase";
-import ChatList from "../components/ChatList";
-import "../styles/chat.css";
+import { db, createChat, getChatMessages, saveMessage, updateChatTitle, deleteChat, getChat } from "../lib/db";
+import "../styles/page.css";
+import ChatThread from "@/components/ChatThread";
 
 export default function Chat() {
   const router = useRouter();
@@ -48,4 +48,102 @@ export default function Chat() {
       navigateToChat(fetchedChats?.[0].id);
     }
   }, [navigateToChat, initializeNewChat, fetchedChats]);
-};
+
+  useEffect(() => {
+    if (!fetchedChats) return
+
+    if (!currentChatId) {
+      const chatId = new URLSearchParams(window.location.search).get('chatId')
+      setActiveChat(chatId)
+    }
+
+    const loadChatMessages = async () => {
+      try {
+        const loadedMessages = await getChatMessages(currentChatId)
+        setMessages(loadedMessages)
+      } catch (error) {
+        console.error('Failed to load messages', error)
+      }
+    }
+
+    loadChatMessages()
+  }, [fetchedChats, currentChatId, setActiveChat, setMessages]);
+
+  useEffect(() => {
+    if (chatThreadRef.current && messages.length > 0) {
+      chatThreadRef.current.scrollTop = chatThreadRef.current.scrollHeight;
+    }
+  }, [messages, currentChatId]);
+
+  const handleChatSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!input || !input.trim()) return;
+
+    await saveMessage(currentChatId, "user", input);
+
+    handleSubmit();
+  };
+
+  const handleDeleteChat = useCallback(async () => {
+    if (!currentChatId) return;
+
+    if (window.confirm("Are you sure you want to delete this chat?")) {
+      await deleteChat(currentChatId);
+      router.push(`/`);
+      setCurrentChatId(null);
+    }
+  }, [currentChatId, router]);
+
+  if (!fetchedChats) {
+    return <div className="loading-state">Loading...</div>;
+  }
+
+  return (
+    <div className="chat-container">
+      <div className="chat-main">
+        <div className="chat-header">
+          <div className="title-group">
+            <h1 className="chat-title">{currentChat?.title || "New Chat"}</h1>
+            <button className="delete-button" onClick={handleDeleteChat} aria-label="Delete Chat">
+              <MinusCircle className="delete-icon" strokeWidth={1.5} />
+            </button>
+          </div>
+        </div>
+
+        <ChatThread
+          messages={messages}
+          status={status}
+          chatThreadRef={chatThreadRef}
+        />
+
+        <div className="input-area">
+          <form onSubmit={handleChatSubmit} className="input-form">
+            <input
+              value={input}
+              placeholder="Message AI Assistant..."
+              onChange={handleInputChange}
+              disabled={status !== "ready" && status !== undefined}
+              className="input-field"
+              aria-label="Chat Input"
+            />
+            <button
+              type="submit"
+              disabled={
+                !input
+                || !input.trim()
+                || 
+                status === "submitted"
+                || status === "streaming"
+              }
+              className="submit-button"
+              aria-label="Send Message"
+            >
+              <SendHorizontal className="submit-icon" strokeWidth={1.5} />
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
