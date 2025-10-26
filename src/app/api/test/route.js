@@ -1,7 +1,6 @@
 import { createOpenAI } from "@ai-sdk/openai";
 import { generateText } from "ai";
 import { NextResponse } from "next/server";
-export const runtime = "edge";
 
 const openai = createOpenAI({
   apiKey: process.env.OPENAI_API_KEY,
