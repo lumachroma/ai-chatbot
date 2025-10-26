@@ -14,7 +14,7 @@ export const createChat = async (title = "New Chat") => {
   });
 };
 
-export const getChats = async (id) => db.chats.get(Number(id));
+export const getChat = async (id) => db.chats.get(Number(id));
 
 export const getChatMessages = (chatId) => {
   if (!chatId) return Promise.resolve([]);
