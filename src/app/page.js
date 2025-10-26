@@ -8,6 +8,7 @@ import { SendHorizontal, MinusCircle } from "lucide-react";
 import { db, createChat, getChatMessages, saveMessage, updateChatTitle, deleteChat, getChat } from "../lib/db";
 import "../styles/page.css";
 import ChatThread from "@/components/ChatThread";
+import Sidebar from "@/components/Sidebar";
 
 export default function Chat() {
   const router = useRouter();
@@ -101,6 +102,12 @@ export default function Chat() {
 
   return (
     <div className="chat-container">
+      <Sidebar
+        fetchedChats={fetchedChats}
+        currentChatId={currentChatId}
+        setCurrentChatId={setCurrentChatId}
+        initializeNewChat={initializeNewChat}
+      />
       <div className="chat-main">
         <div className="chat-header">
           <div className="title-group">
