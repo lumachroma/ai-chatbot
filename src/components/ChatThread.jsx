@@ -5,10 +5,13 @@ const Message = ({ role, content }) => (
   <div className="message-wrapper">
     {role === "user" ? (
       <div className="user-avatar">
-        <User className="user-avatar-icon" strokeWidth={1.5} />
+        {/* <User className="user-avatar-icon" strokeWidth={1.5} /> */}
+        <span style={{ fontSize: "2em" }}>🧔🏻</span>
       </div>
     ) : (
-      <div className="ai-avatar">🤖</div>
+      <div className="ai-avatar">
+         <span style={{ fontSize: "2em" }}>🤖</span>
+      </div>
     )}
     <div className="message-content-wrapper">
       <span className="message-sender">
@@ -25,7 +28,7 @@ const Message = ({ role, content }) => (
 const ChatThread = ({ messages, status, chatThreadRef }) => {
   const welcomeMessage = {
     role: "assistant",
-    content: "👋 Hello! I'm E-Chah, your AI assistant. How can I help you today?"
+    content: `👋 Hello! I'm E-Chah, your AI assistant. How can I help you today?`
   };
 
   return (
